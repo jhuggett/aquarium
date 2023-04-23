@@ -3,7 +3,14 @@ import { sandColor, waterColor } from "./colors.ts";
 import { DenoShell, MathRandom, userInput } from "./deps.ts";
 import { Fish, fishLoop } from "./fish/basic-fish.ts";
 
+// console.log('start');
+
+
 const shell = new DenoShell();
+
+
+
+// shell.debugMode = true
 
 const setup = (shell: DenoShell) => {
   shell.setRaw(true);
@@ -17,6 +24,9 @@ const setup = (shell: DenoShell) => {
     yOffset: "middle",
   });
 
+  // console.log({main: main.debugInfo()});
+  
+
   const { top: tankLayer, bottom: instructionsLayer } = main.splitVertically({
     bottomHeight: 4,
   });
@@ -29,11 +39,20 @@ const setup = (shell: DenoShell) => {
   const { top: waterLayer, bottom: sandLayer } = tankLayer.splitVertically({
     bottomHeight: 2,
   });
+  
+  
+
+  // console.log('a');
+  
 
   waterLayer.fill({ character: " ", backgroundColor: waterColor });
   sandLayer.fill({ character: " ", backgroundColor: sandColor });
+  
 
-  shell.render();
+  // console.log('b');
+  
+
+  // shell.render()
 
   return {
     waterLayer,
@@ -109,6 +128,9 @@ const addFish = (size: "small" | "medium") => {
   seed++;
   loops.push(fishLoop(appContext, fish));
 };
+
+// console.log('ready');
+// console.log({shell: shell.debugInfo()});
 
 await Promise.all(loops);
 
