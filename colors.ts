@@ -1,8 +1,8 @@
 export type RGB = { r: number; g: number; b: number };
 
 export const waterColor = {
-  r: 102,
-  g: 131,
+  r: 72,
+  g: 101,
   b: 249,
 };
 

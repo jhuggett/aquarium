@@ -3,37 +3,34 @@ import { RGB } from "../colors.ts";
 import { XY, Box, Squirrel3, MathRandom, OutOfBoundsError } from "../deps.ts";
 import { Node } from "../node.ts";
 import { Sprite } from "../sprite.ts";
-import { mediumFacingLeft, mediumFacingRight } from "./sprites/medium.ts";
+import { largeFacingLeft, largeFacingRight } from "./sprites/large.ts";
 import { smallFacingLeft, smallFacingRight } from "./sprites/small.ts";
-
-export type BehaviorType = "fast" | "slow";
 
 export class Fish extends Node {
   currentSprite: Sprite;
   currentLocation: XY;
 
   primaryColor: RGB;
-  eyeColor: RGB;
 
   direction: "right" | "left" = "right";
 
   spriteForDirection() {
     if (this.direction === "right")
       switch (this.size) {
-        case "medium": {
-          return mediumFacingRight(this.primaryColor, this.eyeColor);
+        case "large": {
+          return largeFacingRight(this.primaryColor, this.seed, "right");
         }
         case "small": {
-          return smallFacingRight(this.primaryColor, this.eyeColor);
+          return smallFacingRight(this.primaryColor, this.seed);
         }
       }
     if (this.direction === "left")
       switch (this.size) {
-        case "medium": {
-          return mediumFacingLeft(this.primaryColor, this.eyeColor);
+        case "large": {
+          return largeFacingLeft(this.primaryColor, this.seed);
         }
         case "small": {
-          return smallFacingLeft(this.primaryColor, this.eyeColor);
+          return smallFacingLeft(this.primaryColor, this.seed);
         }
       }
   }
@@ -42,14 +39,22 @@ export class Fish extends Node {
     protected box: Box,
     location: XY,
     private seed: number,
-    private size: "small" | "medium" = "medium",
-    public behavior: BehaviorType
+    private size: "small" | "large" = "small",
+    public moveChance: () => number,
+    public timeBetweenMoves: () => number
   ) {
     super();
     const random = new Squirrel3(this.seed, 0);
 
-    this.primaryColor = random.getRandomRGB();
-    this.eyeColor = random.getRandomRGB();
+    const minColor = 25;
+    const maxColor = 125;
+
+    this.primaryColor = {
+      r: random.getRandomNumber(minColor, maxColor),
+      g: random.getRandomNumber(minColor, maxColor),
+      b: random.getRandomNumber(minColor, maxColor),
+    };
+
     this.currentLocation = location;
     this.currentSprite = this.spriteForDirection()!;
   }
@@ -62,29 +67,16 @@ export const fishLoop = async (context: AppContext, fish: Fish) => {
   };
 
   const random = new MathRandom();
-  // const random = new Squirrel3(0, 0);
 
   while (!context.requestingExit) {
-    switch (fish.behavior) {
-      case "fast": {
-        if (random.getRandomBool(0.6)) {
-          movement.x = random.getRandomItem([0, 1, -1]);
-        }
+    if (random.getRandomBool(fish.moveChance())) {
+      movement.x = random.getRandomItem([0, 1, -1]).item;
+    }
 
-        if (random.getRandomBool(0.6)) {
-          movement.y = random.getRandomItem([0, 1, -1]);
-        }
-        break;
-      }
-      case "slow": {
-        if (random.getRandomBool(0.2)) {
-          movement.x = random.getRandomItem([0, 1, -1]);
-        }
-
-        if (random.getRandomBool(0.2)) {
-          movement.y = random.getRandomItem([0, 1, -1]);
-        }
-      }
+    if (movement.x !== 0 && random.getRandomBool(fish.moveChance())) {
+      movement.y = random.getRandomItem([0, 1, -1]).item;
+    } else {
+      movement.y = 0;
     }
 
     if (movement.x === 1 && fish.direction === "left") {
@@ -110,14 +102,6 @@ export const fishLoop = async (context: AppContext, fish: Fish) => {
       }
     }
 
-    switch (fish.behavior) {
-      case "fast": {
-        await sleep(random.getRandomItem([200, 250, 500]));
-        break;
-      }
-      case "slow": {
-        await sleep(random.getRandomItem([600, 800]));
-      }
-    }
+    await sleep(fish.timeBetweenMoves());
   }
 };

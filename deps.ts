@@ -1,7 +1,11 @@
-export {
-  Squirrel3,
-  MathRandom,
-} from "https://raw.githubusercontent.com/jhuggett/random/1.0/mod.ts";
+export { Squirrel3, MathRandom } from "../random/mod.ts";
+export type { Random } from "../random/mod.ts";
+
+// export {
+//   Squirrel3,
+//   MathRandom,
+//   Random,
+// } from "https://raw.githubusercontent.com/jhuggett/random/1.0/mod.ts";
 // export {
 //   DenoShell,
 //   userInput,
