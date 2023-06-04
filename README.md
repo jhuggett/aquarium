@@ -5,3 +5,7 @@ A simple aquarium for your terminal. Add as many fishes, rocks, and plants as yo
 
 
 > Built because a) it's cool and b) to push the limits on https://github.com/jhuggett/terminal
+
+
+## Installation
+Check the latest release and download the appropriate version for your platform. Then just run it in your favourite termaninal emulator!
