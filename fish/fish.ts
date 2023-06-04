@@ -7,7 +7,7 @@ import { largeFacingLeft, largeFacingRight } from "./sprites/large.ts";
 import { smallFacingLeft, smallFacingRight } from "./sprites/small.ts";
 
 export class Fish extends Node {
-  currentSprite: Sprite;
+  sprites: Sprite[];
   currentLocation: XY;
 
   primaryColor: RGB;
@@ -56,7 +56,7 @@ export class Fish extends Node {
     };
 
     this.currentLocation = location;
-    this.currentSprite = this.spriteForDirection()!;
+    this.sprites = [this.spriteForDirection()!];
   }
 }
 
@@ -79,17 +79,23 @@ export const fishLoop = async (context: AppContext, fish: Fish) => {
       movement.y = 0;
     }
 
-    if (movement.x === 1 && fish.direction === "left") {
-      fish.direction = "right";
-      fish.switchSprites(fish.spriteForDirection()!);
-    }
-    if (movement.x === -1 && fish.direction === "right") {
-      fish.direction = "left";
-      fish.switchSprites(fish.spriteForDirection()!);
+    try {
+      if (movement.x === 1 && fish.direction === "left") {
+        fish.direction = "right";
+        fish.switchSprites([fish.spriteForDirection()!]);
+      }
+      if (movement.x === -1 && fish.direction === "right") {
+        fish.direction = "left";
+        fish.switchSprites([fish.spriteForDirection()!]);
+      }
+    } catch (error) {
+      if (!(error instanceof OutOfBoundsError)) {
+        throw error;
+      }
     }
 
     try {
-      fish.moveSprite(movement);
+      fish.moveBy(movement);
     } catch (error) {
       if (!(error instanceof OutOfBoundsError)) {
         throw error;

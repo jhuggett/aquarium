@@ -76,36 +76,34 @@ const createRockSprite = (random: Random): Sprite => {
 };
 
 export class Rock extends Node {
-  currentSprite: Sprite;
+  sprites: Sprite[];
   currentLocation: XY;
 
   constructor(protected box: Box, location: XY, private seed: number) {
     super();
     const random = new Squirrel3(this.seed, 0);
 
-    this.currentSprite = createRockSprite(random);
+    this.sprites = [createRockSprite(random)];
     this.currentLocation = location;
   }
 }
 
 export const rockLoop = async (context: AppContext, rock: Rock) => {
-  const movement = {
-    x: 0,
-    y: 1,
-  };
-
   const random = new MathRandom();
 
   while (!context.requestingExit) {
     try {
-      rock.moveSprite(movement);
-    } catch (error) {
-      if (error instanceof OutOfBoundsError) {
-        return;
+      if (!rock.isAtBottomOfBox) {
+        rock.moveDown();
       }
-      throw error;
+    } catch (error) {
+      if (!(error instanceof OutOfBoundsError)) {
+        throw error;
+      }
     }
 
-    await sleep(random.getRandomItem([50]).item);
+    await sleep(
+      random.getRandomItem(rock.isAtBottomOfBox ? [1000] : [50]).item
+    );
   }
 };

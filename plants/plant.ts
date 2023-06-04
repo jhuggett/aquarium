@@ -27,65 +27,47 @@ const createPlantSprite = (random: Random): Sprite => {
   );
 };
 
-export class PlantPiece extends Node {
-  currentSprite: Sprite;
-  currentLocation: XY;
+export class Plant extends Node {
+  sprites: Sprite[] = [];
 
-  constructor(protected box: Box, location: XY, private seed: number) {
+  constructor(
+    height: number,
+    protected box: Box,
+    public currentLocation: XY,
+    seed: number
+  ) {
     super();
-    const random = new Squirrel3(this.seed, 0);
-
-    this.currentSprite = createPlantSprite(random);
-    this.currentLocation = location;
-  }
-}
-
-export class Plant {
-  pieces: PlantPiece[] = [];
-
-  constructor(height: number, box: Box, location: XY, seed: number) {
+    const random = new Squirrel3(seed, 0);
     for (let i = 0; i <= height; i++) {
-      this.pieces.push(
-        new PlantPiece(box, { ...location, y: location.y + i }, seed + i)
-      );
+      const piece = createPlantSprite(random);
+      piece.offset.y = i;
+      this.sprites.push(piece);
     }
-    this.pieces.reverse();
-  }
-
-  drawCurrentSprite() {
-    this.pieces.forEach((piece) => piece.drawCurrentSprite());
+    this.sprites.reverse();
   }
 }
 
 export const plantLoop = async (context: AppContext, plant: Plant) => {
-  const movement = {
-    x: 0,
-    y: 1,
-  };
-
   const random = new MathRandom();
 
   while (!context.requestingExit) {
     try {
-      if (movement.y) {
-        plant.pieces.forEach((piece) => piece.moveSprite(movement));
+      if (!plant.isAtBottomOfBox) {
+        plant.moveDown();
       } else {
         // wiggle
+
         const { index, item: piece } = random.getRandomItem(
-          plant.pieces.slice(1)
+          plant.sprites.slice(1)
         );
 
         // remember, index is behind by 1
         // because its a slice of pieces
-        const prev = plant.pieces[index];
-        const next = plant.pieces[index + 2];
+        const prev = plant.sprites[index];
+        const next = plant.sprites[index + 2];
 
-        const distanceToPrev = prev
-          ? piece.currentLocation.x - prev.currentLocation.x
-          : 0;
-        const distanceToNext = next
-          ? piece.currentLocation.x - next.currentLocation.x
-          : 0;
+        const distanceToPrev = prev ? piece.offset.x - prev.offset.x : 0;
+        const distanceToNext = next ? piece.offset.x - next.offset.x : 0;
 
         const options = [0];
 
@@ -96,17 +78,22 @@ export const plantLoop = async (context: AppContext, plant: Plant) => {
         else if (distanceToNext === 0 && distanceToPrev === 0)
           options.push(-1, 1);
 
-        piece.moveSprite({
-          y: 0,
-          x: random.getRandomItem(options).item,
-        });
+        if (options.length > 0) {
+          piece.offset.x += random.getRandomItem(options).item;
+        }
+
+        plant.drawCurrentSprites();
       }
     } catch (error) {
       if (error instanceof OutOfBoundsError) {
-        movement.y = 0;
-      } else throw error;
+        // do nothing
+      } else {
+        throw error;
+      }
     }
 
-    await sleep(random.getRandomItem(movement.y ? [50] : [250]).item);
+    await sleep(
+      random.getRandomItem(!plant.isAtBottomOfBox ? [50] : [250]).item
+    );
   }
 };

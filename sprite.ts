@@ -1,17 +1,17 @@
-import { Point, XY } from "./deps.ts";
+import { Point, combine } from "./deps.ts";
 
 export class Sprite {
   constructor(public points: Omit<Point, "zIndex">[]) {}
 
-  getRelativePointsRelativeTo({ x, y }: XY) {
-    const relativePoints = this.points.map((point) => ({
+  get offsetPoints() {
+    return this.points.map((point) => ({
       ...point,
-      coordinate: {
-        x: point.coordinate.x + x,
-        y: point.coordinate.y + y,
-      },
+      coordinate: combine([point.coordinate, this.offset]),
     }));
-
-    return relativePoints;
   }
+
+  offset = {
+    x: 0,
+    y: 0,
+  };
 }
