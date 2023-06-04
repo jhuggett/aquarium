@@ -12,8 +12,8 @@ export {
   UnknownKeyCodeError,
   XYSet,
   combine,
-} from "https://raw.githubusercontent.com/jhuggett/terminal/1.0.5/mod.ts";
+} from "https://raw.githubusercontent.com/jhuggett/terminal/1.0.6/mod.ts";
 export type {
   Point,
   XY,
-} from "https://raw.githubusercontent.com/jhuggett/terminal/1.0.5/mod.ts";
+} from "https://raw.githubusercontent.com/jhuggett/terminal/1.0.6/mod.ts";
